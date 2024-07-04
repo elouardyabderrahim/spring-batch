@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: spring batch
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: admin
+    password: admin
+    url: jdbc:postgres://localhost:5234/batchdemo
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
