@@ -13,11 +13,13 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
+import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -31,7 +33,19 @@ public class SpringBatchConfig {
 
        // Create the reader
     @Bean
-    public FlatFileItemReader<Customer> customerReader() {
+    public FlatFileItemReader customerReader() {
+        return new FlatFileItemReaderBuilder<>().name("coffeeItemReader")
+                .resource(new ClassPathResource("customers.csv"))
+                .linesToSkip(1)
+                .delimited()
+                .names(new String[] { "id", "firstName", "lastName", "email", "gender", "contactNo", "country", "dob" })
+                .fieldSetMapper(new BeanWrapperFieldSetMapper() {{
+                    setTargetType(Customer.class);
+                }})
+                .build();
+    }
+    //the commented code is the first code but i had a problem with the reader FlatFileItemReader changed to FlatFileItemReaderBuilder:
+  /*  public FlatFileItemReader<Customer> customerReader() {
 
         FlatFileItemReader<Customer> itemReader = new FlatFileItemReader<>();
         Resource resource = new FileSystemResource("customers.csv");
@@ -44,7 +58,9 @@ public class SpringBatchConfig {
         return itemReader;
     }
 
-    private LineMapper<Customer> lineMapper() {
+   */
+
+    /*private LineMapper<Customer> lineMapper() {
 
         DefaultLineMapper<Customer> lineMapper = new DefaultLineMapper<>();
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
@@ -60,6 +76,8 @@ public class SpringBatchConfig {
         lineMapper.setFieldSetMapper(fieldSetMapper);
         return lineMapper;
     }
+
+     */
 
 
     // create processor:
