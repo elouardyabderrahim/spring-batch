@@ -17,12 +17,12 @@ import org.springframework.core.io.Resource;
 @EnableBatchProcessing
 public class SpringBatchConfig {
 
-// Create the reader
+    // Create the reader
     @Bean
-    public FlatFileItemReader<Customer> customerReader(){
+    public FlatFileItemReader<Customer> customerReader() {
 
-        FlatFileItemReader<Customer> itemReader= new FlatFileItemReader<>();
-        Resource resource=new FileSystemResource("customers.csv");
+        FlatFileItemReader<Customer> itemReader = new FlatFileItemReader<>();
+        Resource resource = new FileSystemResource("customers.csv");
         itemReader.setResource(resource);
         itemReader.setName("csv_customer_reader");
         itemReader.setLinesToSkip(1);
@@ -34,19 +34,31 @@ public class SpringBatchConfig {
 
     private LineMapper<Customer> lineMapper() {
 
-        DefaultLineMapper<Customer> lineMapper= new DefaultLineMapper<>();
-        DelimitedLineTokenizer lineTokenizer=new DelimitedLineTokenizer();
+        DefaultLineMapper<Customer> lineMapper = new DefaultLineMapper<>();
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
         lineTokenizer.setStrict(false);// allow some empty columns
         lineTokenizer.setNames("id", "firstName", "lastName", "email", "gender", "contactNo", "country", "dob");
 
         // convert data to customer bean object
-        BeanWrapperFieldSetMapper<Customer> fieldSetMapper=new BeanWrapperFieldSetMapper<>();
+        BeanWrapperFieldSetMapper<Customer> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
         fieldSetMapper.setTargetType(Customer.class);
 
         lineMapper.setLineTokenizer(lineTokenizer);
         lineMapper.setFieldSetMapper(fieldSetMapper);
         return lineMapper;
     }
-}
 
+
+    // create processor:
+    public CustomerProcessor customerProcessor() {
+        return new CustomerProcessor();
+    }
+
+
+
+
+    // create writer:
+// create Step
+// create Job
+}
