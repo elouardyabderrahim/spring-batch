@@ -2,7 +2,10 @@ package com.batch.customer.config;
 
 
 import com.batch.customer.entity.Customer;
+import com.batch.customer.repository.CustomerRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -15,7 +18,10 @@ import org.springframework.core.io.Resource;
 
 @Configuration
 @EnableBatchProcessing
+@AllArgsConstructor
 public class SpringBatchConfig {
+
+    private CustomerRepository customerRepository;
 
     // Create the reader
     @Bean
@@ -51,14 +57,23 @@ public class SpringBatchConfig {
 
 
     // create processor:
+    @Bean
     public CustomerProcessor customerProcessor() {
         return new CustomerProcessor();
     }
 
-
-
-
     // create writer:
+    @Bean
+    public RepositoryItemWriter<Customer> customerWriter(){
+
+
+        RepositoryItemWriter<Customer> customerRepositoryItemWriter=new RepositoryItemWriter<>();
+        customerRepositoryItemWriter.setRepository(customerRepository);
+        customerRepositoryItemWriter.setMethodName("save");
+        return customerRepositoryItemWriter;
+    }
+
+
 // create Step
 // create Job
 }
