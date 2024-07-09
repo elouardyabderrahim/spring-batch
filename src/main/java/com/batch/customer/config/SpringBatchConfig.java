@@ -4,7 +4,12 @@ package com.batch.customer.config;
 import com.batch.customer.entity.Customer;
 import com.batch.customer.repository.CustomerRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
@@ -15,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableBatchProcessing
@@ -23,7 +29,7 @@ public class SpringBatchConfig {
 
     private CustomerRepository customerRepository;
 
-    // Create the reader
+       // Create the reader
     @Bean
     public FlatFileItemReader<Customer> customerReader() {
 
@@ -65,15 +71,29 @@ public class SpringBatchConfig {
     // create writer:
     @Bean
     public RepositoryItemWriter<Customer> customerWriter(){
-
-
         RepositoryItemWriter<Customer> customerRepositoryItemWriter=new RepositoryItemWriter<>();
         customerRepositoryItemWriter.setRepository(customerRepository);
         customerRepositoryItemWriter.setMethodName("save");
         return customerRepositoryItemWriter;
     }
 
-
 // create Step
+    @Bean
+    public Step step(JobRepository jobRepository, PlatformTransactionManager platformTransactionManager){
+        return new StepBuilder("stepOne",jobRepository).<Customer,Customer> chunk(10,platformTransactionManager)
+                .reader(customerReader())
+                .processor(customerProcessor())
+                .writer(customerWriter())
+                .build();
+    }
+
 // create Job
+@Bean
+public Job sampleJob(JobRepository jobRepository,Step step) {
+    return new JobBuilder("jobOne", jobRepository)
+            .flow(step)
+            .end()
+            .build();
+}
+
 }
